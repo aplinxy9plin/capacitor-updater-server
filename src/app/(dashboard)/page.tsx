@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import Link from "next/link"
-import { Plus, Trash2, Box } from "lucide-react"
+import { Plus, Trash2, Box, Package, Smartphone, ChevronRight } from "lucide-react"
 
 interface App {
   id: string; name: string; appId: string; bundleCount: number
@@ -43,12 +43,17 @@ export default function AppsPage() {
   if (isLoading) return <div className="text-muted-foreground p-4">Loading...</div>
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Apps</h2>
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Apps</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Manage your Capacitor applications</p>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1.5" /> New App</Button>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> New App
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Add App</DialogTitle></DialogHeader>
@@ -70,47 +75,65 @@ export default function AppsPage() {
       </div>
 
       {apps.length === 0 ? (
-        <div className="border border-dashed border-border rounded-lg p-10 text-center">
-          <Box className="h-8 w-8 mx-auto mb-2 text-muted-foreground/40" />
-          <p className="text-muted-foreground">No apps yet</p>
-          <p className="text-sm text-muted-foreground mt-1">Create an app to start uploading bundles</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Box className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="font-medium text-foreground">No apps yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">Create an app to start uploading bundles</p>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>App ID</TableHead>
-                <TableHead>Active</TableHead>
-                <TableHead className="text-right">Bundles</TableHead>
-                <TableHead className="text-right">Devices</TableHead>
-                <TableHead className="w-10"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {apps.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>
-                    <Link href={`/apps/${app.id}`} className="font-medium hover:underline">{app.name}</Link>
-                  </TableCell>
-                  <TableCell className="font-mono text-muted-foreground">{app.appId}</TableCell>
-                  <TableCell>
-                    {app.activeVersion
-                      ? <Badge>{app.activeVersion}</Badge>
-                      : <span className="text-muted-foreground">—</span>}
-                  </TableCell>
-                  <TableCell className="text-right text-muted-foreground">{app.bundleCount}</TableCell>
-                  <TableCell className="text-right text-muted-foreground">{app.deviceCount}</TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteApp(app.id)}>
-                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {apps.map((app) => (
+            <div key={app.id} className="group relative rounded-xl border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:shadow-md">
+              <div className="mb-4 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                    <Package className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <Link href={`/apps/${app.id}`} className="font-semibold text-foreground hover:underline">
+                      {app.name}
+                    </Link>
+                    <p className="font-mono text-xs text-muted-foreground">{app.appId}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100"
+                  onClick={() => deleteApp(app.id)}
+                >
+                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Package className="h-3.5 w-3.5" />
+                  <span>{app.bundleCount} bundles</span>
+                </div>
+                <div className="flex items-center gap-1.5 text-muted-foreground">
+                  <Smartphone className="h-3.5 w-3.5" />
+                  <span>{app.deviceCount} devices</span>
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+                <div>
+                  {app.activeVersion
+                    ? <Badge>{app.activeVersion}</Badge>
+                    : <span className="text-xs text-muted-foreground">No active version</span>}
+                </div>
+                <Link
+                  href={`/apps/${app.id}`}
+                  className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80"
+                >
+                  Manage <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

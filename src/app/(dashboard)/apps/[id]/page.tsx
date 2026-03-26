@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { ArrowLeft, Upload, Play, Trash2, Plus } from "lucide-react"
+import { ArrowLeft, Upload, Play, Trash2, Plus, Package } from "lucide-react"
 import Link from "next/link"
 
 interface Bundle {
@@ -59,7 +59,7 @@ export default function AppDetailPage() {
   }
 
   function fmtSize(b: number | null) {
-    if (!b) return "—"
+    if (!b) return "\u2014"
     return b < 1024 * 1024 ? `${(b / 1024).toFixed(0)} KB` : `${(b / 1024 / 1024).toFixed(1)} MB`
   }
 
@@ -67,16 +67,28 @@ export default function AppDetailPage() {
   if (!app) return <div className="text-destructive p-4">App not found</div>
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-4">
-        <Link href="/"><Button variant="ghost" size="icon" className="h-8 w-8"><ArrowLeft className="h-4 w-4" /></Button></Link>
-        <div className="flex-1">
-          <h2 className="text-lg font-semibold leading-tight">{app.name}</h2>
-          <p className="text-sm text-muted-foreground font-mono">{app.appId}</p>
+    <div className="mx-auto max-w-5xl">
+      {/* Header */}
+      <div className="mb-6 flex items-center gap-4">
+        <Link href="/">
+          <Button variant="outline" size="icon" className="h-9 w-9">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <div className="flex items-center gap-3 flex-1">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+            <Package className="h-5 w-5 text-blue-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground leading-tight">{app.name}</h1>
+            <p className="font-mono text-sm text-muted-foreground">{app.appId}</p>
+          </div>
         </div>
         <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) { setError(""); setFile(null) } }}>
           <DialogTrigger>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1.5" /> Upload Bundle</Button>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Upload Bundle
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Upload Bundle</DialogTitle></DialogHeader>
@@ -91,8 +103,10 @@ export default function AppDetailPage() {
               </div>
               <div>
                 <Label>Zip file</Label>
-                <div className="border border-dashed border-border rounded-lg p-5 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                  onClick={() => fileRef.current?.click()}>
+                <div
+                  className="rounded-lg border border-dashed border-border bg-muted/50 p-6 text-center cursor-pointer transition-colors hover:border-primary/50 hover:bg-muted"
+                  onClick={() => fileRef.current?.click()}
+                >
                   <input ref={fileRef} type="file" accept=".zip" className="hidden" onChange={e => setFile(e.target.files?.[0] || null)} />
                   {file
                     ? <p className="text-sm"><span className="font-medium">{file.name}</span> — {fmtSize(file.size)}</p>
@@ -108,13 +122,17 @@ export default function AppDetailPage() {
         </Dialog>
       </div>
 
+      {/* Bundles */}
       {bundles.length === 0 ? (
-        <div className="border border-dashed border-border rounded-lg p-10 text-center">
-          <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground/40" />
-          <p className="text-muted-foreground">No bundles yet. Upload your first bundle.</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Upload className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="font-medium text-foreground">No bundles yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">Upload your first bundle</p>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -128,16 +146,16 @@ export default function AppDetailPage() {
             </TableHeader>
             <TableBody>
               {bundles.map((b) => (
-                <TableRow key={b.id}>
+                <TableRow key={b.id} className="transition-colors hover:bg-accent/50">
                   <TableCell className="font-mono font-medium">{b.version}</TableCell>
                   <TableCell>
                     <Badge variant={b.status === "active" ? "default" : b.status === "draft" ? "outline" : "secondary"}>
                       {b.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{fmtSize(b.fileSize)}</TableCell>
-                  <TableCell className="text-muted-foreground max-w-40 truncate">{b.notes || "—"}</TableCell>
-                  <TableCell className="text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{fmtSize(b.fileSize)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground max-w-40 truncate">{b.notes || "\u2014"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{new Date(b.createdAt).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <div className="flex gap-1">
                       {b.status === "draft" && b.checksumSha256 && (

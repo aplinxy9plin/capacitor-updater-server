@@ -4,6 +4,7 @@ import { useState } from "react"
 import useSWR from "swr"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { Settings, Shield } from "lucide-react"
 
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 
@@ -22,17 +23,31 @@ export default function SettingsPage() {
   if (isLoading) return <div className="text-muted-foreground p-4">Loading...</div>
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-4">Settings</h2>
-      <div className="border border-border rounded-lg p-4 max-w-md">
-        <div className="flex items-center justify-between">
-          <div>
-            <Label className="text-sm font-medium">Registration</Label>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {settings.registration_enabled === "true" ? "New users can register." : "Registration disabled."}
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Server configuration</p>
+      </div>
+
+      <div className="max-w-lg rounded-xl border border-border bg-card p-5 shadow-sm">
+        <div className="flex items-start gap-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-orange-500/10">
+            <Shield className="h-5 w-5 text-orange-500" />
+          </div>
+          <div className="flex-1">
+            <Label className="text-sm font-semibold text-foreground">User Registration</Label>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {settings.registration_enabled === "true"
+                ? "New users can create accounts."
+                : "Registration is disabled. Only existing users can sign in."}
             </p>
           </div>
-          <Button size="sm" variant={settings.registration_enabled === "true" ? "destructive" : "default"} onClick={toggleRegistration} disabled={saving}>
+          <Button
+            size="sm"
+            variant={settings.registration_enabled === "true" ? "destructive" : "default"}
+            onClick={toggleRegistration}
+            disabled={saving}
+          >
             {settings.registration_enabled === "true" ? "Disable" : "Enable"}
           </Button>
         </div>

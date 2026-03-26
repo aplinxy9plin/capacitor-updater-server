@@ -18,15 +18,22 @@ export default function DevicesPage() {
   if (isLoading) return <div className="text-muted-foreground p-4">Loading...</div>
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold mb-4">Devices</h2>
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-foreground">Devices</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Devices that have checked for updates</p>
+      </div>
+
       {devices.length === 0 ? (
-        <div className="border border-dashed border-border rounded-lg p-10 text-center">
-          <Smartphone className="h-6 w-6 mx-auto mb-2 text-muted-foreground/40" />
-          <p className="text-muted-foreground">No devices yet. They appear after checking for updates.</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Smartphone className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="font-medium text-foreground">No devices yet</p>
+          <p className="mt-1 text-sm text-muted-foreground">They appear after checking for updates</p>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -39,12 +46,12 @@ export default function DevicesPage() {
             </TableHeader>
             <TableBody>
               {devices.map(d => (
-                <TableRow key={d.id}>
-                  <TableCell className="font-mono">{d.deviceId.slice(0, 16)}...</TableCell>
-                  <TableCell className="font-mono text-muted-foreground">{d.appId || "—"}</TableCell>
-                  <TableCell><Badge variant="outline">{d.platform || "—"}</Badge></TableCell>
-                  <TableCell className="font-mono">{d.currentVersion || "builtin"}</TableCell>
-                  <TableCell className="text-muted-foreground">{new Date(d.lastSeenAt).toLocaleString()}</TableCell>
+                <TableRow key={d.id} className="transition-colors hover:bg-accent/50">
+                  <TableCell className="font-mono text-sm">{d.deviceId.slice(0, 16)}...</TableCell>
+                  <TableCell className="font-mono text-sm text-muted-foreground">{d.appId || "\u2014"}</TableCell>
+                  <TableCell><Badge variant="outline">{d.platform || "\u2014"}</Badge></TableCell>
+                  <TableCell className="font-mono text-sm">{d.currentVersion || "builtin"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{new Date(d.lastSeenAt).toLocaleString()}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

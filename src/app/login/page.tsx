@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { authClient } from "@/lib/auth-client"
+import { Zap, Mail, Lock } from "lucide-react"
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false)
@@ -57,26 +58,74 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="w-80 border border-border rounded-lg p-6">
-        <h1 className="text-base font-semibold text-center mb-0.5">Capacitor Updater</h1>
-        <p className="text-sm text-muted-foreground text-center mb-5">Self-hosted OTA update server</p>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <div>
-            <Label>Email</Label>
-            <Input type="email" placeholder="admin@example.com" value={email} onChange={e => setEmail(e.target.value)} required />
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-8 shadow-sm">
+        {/* Header */}
+        <div className="mb-6 flex flex-col items-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+            <Zap className="h-6 w-6 text-white" />
           </div>
-          <div>
-            <Label>Password</Label>
-            <Input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} required minLength={8} />
+          <h1 className="text-lg font-semibold text-foreground">Capacitor Updater</h1>
+          <p className="text-sm text-muted-foreground">Self-hosted OTA update server</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-sm">Email</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="email"
+                placeholder="admin@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                className="pl-10"
+              />
+            </div>
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" disabled={loading} className="w-full">{loading ? "..." : isRegister ? "Create Account" : "Sign In"}</Button>
+
+          <div className="space-y-1.5">
+            <Label className="text-sm">Password</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                minLength={8}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
+
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "..." : isRegister ? "Create Account" : "Sign In"}
+          </Button>
+
           {regEnabled && !isRegister && (
-            <button type="button" onClick={() => setIsRegister(true)} className="text-sm text-muted-foreground hover:text-foreground w-full text-center">Create account</button>
+            <button
+              type="button"
+              onClick={() => setIsRegister(true)}
+              className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Create account
+            </button>
           )}
           {isRegister && (
-            <button type="button" onClick={() => setIsRegister(false)} className="text-sm text-muted-foreground hover:text-foreground w-full text-center">Sign in</button>
+            <button
+              type="button"
+              onClick={() => setIsRegister(false)}
+              className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Sign in instead
+            </button>
           )}
         </form>
       </div>

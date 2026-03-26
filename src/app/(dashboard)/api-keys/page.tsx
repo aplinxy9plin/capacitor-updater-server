@@ -33,12 +33,17 @@ export default function ApiKeysPage() {
   if (isLoading) return <div className="text-muted-foreground p-4">Loading...</div>
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">API Keys</h2>
+    <div className="mx-auto max-w-5xl">
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">API Keys</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Authentication keys for your Capacitor apps</p>
+        </div>
         <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) setCreatedKey(null) }}>
           <DialogTrigger>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1.5" /> Create Key</Button>
+            <Button size="sm" className="gap-1.5">
+              <Plus className="h-4 w-4" /> Create Key
+            </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{createdKey ? "Key Created" : "Create API Key"}</DialogTitle></DialogHeader>
@@ -69,12 +74,15 @@ export default function ApiKeysPage() {
       </div>
 
       {keys.length === 0 ? (
-        <div className="border border-dashed border-border rounded-lg p-10 text-center">
-          <Key className="h-6 w-6 mx-auto mb-2 text-muted-foreground/40" />
-          <p className="text-muted-foreground">No API keys. Create one for your Capacitor app.</p>
+        <div className="rounded-xl border border-dashed border-border bg-card p-12 text-center shadow-sm">
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+            <Key className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="font-medium text-foreground">No API keys</p>
+          <p className="mt-1 text-sm text-muted-foreground">Create one for your Capacitor app</p>
         </div>
       ) : (
-        <div className="border border-border rounded-lg overflow-hidden">
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -86,10 +94,10 @@ export default function ApiKeysPage() {
             </TableHeader>
             <TableBody>
               {keys.map(k => (
-                <TableRow key={k.id}>
+                <TableRow key={k.id} className="transition-colors hover:bg-accent/50">
                   <TableCell className="font-medium">{k.name}</TableCell>
-                  <TableCell className="font-mono text-muted-foreground">{k.keyPrefix}...</TableCell>
-                  <TableCell className="text-muted-foreground">{k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : "Never"}</TableCell>
+                  <TableCell className="font-mono text-sm text-muted-foreground">{k.keyPrefix}...</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{k.lastUsedAt ? new Date(k.lastUsedAt).toLocaleString() : "Never"}</TableCell>
                   <TableCell>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => deleteKey(k.id)}>
                       <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
