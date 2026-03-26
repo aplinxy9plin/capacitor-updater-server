@@ -7,11 +7,12 @@ Implements the [`@capgo/capacitor-updater`](https://github.com/Cap-go/capacitor-
 ## Features
 
 - **OTA Updates** — Push web bundle updates to your Capacitor apps without App Store review
+- **Instant Updates** — `directUpdate` support applies updates immediately on first launch
 - **Multi-App Support** — Manage multiple apps from a single dashboard
 - **Bundle Management** — Upload, version, and activate bundles with one click
 - **Device Tracking** — See which devices are running which version
 - **Analytics** — Update success rates, version distribution, device stats
-- **API Key Auth** — Secure plugin endpoints with SHA-256 hashed API keys
+- **API Key Auth** — Secure the admin dashboard and stats reporting with API keys
 - **Interactive API Docs** — Auto-generated Swagger/Scalar documentation at `/api/docs`
 - **Single Active Bundle** — Database-enforced constraint ensures exactly one active bundle per app
 - **Dark Mode** — Full light/dark theme support
@@ -89,13 +90,19 @@ const config: CapacitorConfig = {
     CapacitorUpdater: {
       updateUrl: 'https://your-server.com/api/update',
       statsUrl: 'https://your-server.com/api/stats',
-      headers: {
-        'x-api-key': 'sk_your_api_key_here',
-      },
+      autoUpdate: true,
+      directUpdate: true,
     },
   },
 };
 ```
+
+| Option | Description |
+|--------|-------------|
+| `updateUrl` | Your server's update endpoint |
+| `statsUrl` | Your server's stats endpoint |
+| `autoUpdate` | Enable automatic update checks (default: `true`) |
+| `directUpdate` | Apply updates immediately after download instead of waiting for app restart. Users will see a brief WebView reload. |
 
 ### 3. Notify the plugin on app ready
 
@@ -105,31 +112,46 @@ import { CapacitorUpdater } from '@capgo/capacitor-updater';
 CapacitorUpdater.notifyAppReady();
 ```
 
+This tells the plugin that the update loaded successfully. Without this call, the plugin will roll back to the previous version after a timeout.
+
 ### 4. Upload a bundle
 
-Build your web assets, zip them, and upload through the dashboard or API.
+Build your web assets, zip them, and upload through the dashboard.
 
 ```bash
 npm run build && npx cap sync
 cd dist && zip -r ../bundle.zip . && cd ..
 ```
 
-Then go to your app in the dashboard, click **Upload Bundle**, and activate it.
+Then go to your app in the dashboard, click **Upload Bundle**, enter the version, and activate it.
+
+### How updates work
+
+1. App launches → plugin calls `/api/update` with current `version_name`
+2. Server compares with active bundle version (exact string match, not semver)
+3. If different → returns download URL
+4. Plugin downloads the zip in the background
+5. With `directUpdate: true` → WebView reloads immediately with new bundle
+6. Without `directUpdate` → update applies on next app restart
 
 ## API
 
-All plugin endpoints require the `x-api-key` header. Admin endpoints require a BetterAuth session cookie.
+Plugin endpoints (`/api/update`, `/api/download`) are **public** — no API key required. The `@capgo/capacitor-updater` plugin does not send custom headers on these requests.
+
+API keys are used for **stats reporting** (`/api/stats`) and the **admin dashboard**. Create them in the dashboard under API Keys.
 
 ### Plugin Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/api/update` | Check for updates (rate limited) |
-| `POST` | `/api/stats` | Report update status |
-| `GET` | `/api/download/:bundleId` | Download bundle zip |
-| `GET` | `/api/health` | Health check |
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/update` | None | Check for updates (rate limited by app_id) |
+| `GET` | `/api/download/:bundleId` | None | Download bundle zip (bundle UUID is unguessable) |
+| `POST` | `/api/stats` | `x-api-key` header | Report update status |
+| `GET` | `/api/health` | None | Health check |
 
 ### Admin Endpoints
+
+All admin endpoints require a BetterAuth session cookie (login via the dashboard).
 
 | Method | Path | Description |
 |--------|------|-------------|

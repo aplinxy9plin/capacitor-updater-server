@@ -33,7 +33,7 @@ API-first: the admin UI consumes the same REST API that the mobile plugin uses.
 All API routes go through Elysia via a single catch-all: `src/app/api/[[...slugs]]/route.ts`
 
 - **Elysia entry**: `src/elysia.ts` — registers all module routes + auth handler
-- **Plugin endpoints**: `/api/update`, `/api/stats`, `/api/download/:id` (authenticated by `x-api-key` header)
+- **Plugin endpoints**: `/api/update`, `/api/download/:id` (public, no auth), `/api/stats` (x-api-key header)
 - **Admin API**: `/api/v1/*` (authenticated by BetterAuth session)
 - **Auth API**: `/api/auth/*` (handled by BetterAuth)
 - **API docs**: `/api/docs` (Swagger/Scalar UI, auto-generated from TypeBox schemas)
@@ -59,7 +59,8 @@ Each feature is a module in `src/modules/{name}/`:
 - API keys use SHA-256 (not bcrypt) — keys are long random strings
 - Single active bundle enforced by partial unique index
 - Version comparison uses exact string equality (not semver ordering)
-- Bundle downloads require API key authentication
+- Plugin endpoints `/api/update` and `/api/download` are public (plugin doesn't send custom headers on these)
+- Bundle download URLs use random UUIDs as unguessable tokens
 - BetterAuth uses a separate PostgreSQL database from the app
 - Queries use `bun sql` template literals, not Drizzle query builder
 - Frontend uses SWR with 30s refresh interval for real-time data
