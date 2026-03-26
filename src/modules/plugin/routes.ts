@@ -10,18 +10,13 @@ export const pluginRoutes = new Elysia()
   .post(
     "/update",
     async ({ body, request }) => {
-      const apiKey = request.headers.get("x-api-key") || ""
-      const { allowed } = rateLimit(`update:${apiKey.slice(0, 11)}`, 100, 60_000)
+      const { device_id, app_id, platform, version_name, version_os, is_emulator, is_prod } = body
+
+      // Rate limit by app_id (plugin doesn't always send x-api-key on update)
+      const { allowed } = rateLimit(`update:${app_id}`, 100, 60_000)
       if (!allowed) {
         return new Response(JSON.stringify({ error: "rate_limited", message: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } })
       }
-
-      const { valid } = await validateApiKey(apiKey)
-      if (!valid) {
-        return new Response(JSON.stringify({ error: "unauthorized", message: "Invalid API key" }), { status: 401, headers: { "Content-Type": "application/json" } })
-      }
-
-      const { device_id, app_id, platform, version_name, version_os, is_emulator, is_prod } = body
 
       const active = await getActiveBundleForApp(app_id)
       if (!active) {
