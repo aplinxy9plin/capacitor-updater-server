@@ -61,6 +61,8 @@ Each feature is a module in `src/modules/{name}/`:
 - Version comparison uses exact string equality (not semver ordering)
 - Plugin endpoints `/api/update` and `/api/download` are public (plugin doesn't send custom headers on these)
 - Bundle download URLs use random UUIDs as unguessable tokens
+- Multi-tenancy: apps have user_id, all queries filter by session user — users only see their own data
+- Rate limiting on `/api/update` is per-IP (30 req/min) via `x-forwarded-for` header
 - BetterAuth uses a separate PostgreSQL database from the app
 - Queries use `bun sql` template literals, not Drizzle query builder
 - Frontend uses SWR with 30s refresh interval for real-time data

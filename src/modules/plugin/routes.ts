@@ -12,8 +12,8 @@ export const pluginRoutes = new Elysia()
     async ({ body, request }) => {
       const { device_id, app_id, platform, version_name, version_os, is_emulator, is_prod } = body
 
-      // Rate limit by app_id (plugin doesn't always send x-api-key on update)
-      const { allowed } = rateLimit(`update:${app_id}`, 100, 60_000)
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown"
+      const { allowed } = rateLimit(`update:${ip}`, 30, 60_000)
       if (!allowed) {
         return new Response(JSON.stringify({ error: "rate_limited", message: "Too many requests" }), { status: 429, headers: { "Content-Type": "application/json" } })
       }

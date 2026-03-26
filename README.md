@@ -144,7 +144,7 @@ API keys are used for **stats reporting** (`/api/stats`) and the **admin dashboa
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `POST` | `/api/update` | None | Check for updates (rate limited by app_id) |
+| `POST` | `/api/update` | None | Check for updates (rate limited per IP) |
 | `GET` | `/api/download/:bundleId` | None | Download bundle zip (bundle UUID is unguessable) |
 | `POST` | `/api/stats` | `x-api-key` header | Report update status |
 | `GET` | `/api/health` | None | Health check |
