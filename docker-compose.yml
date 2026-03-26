@@ -1,0 +1,58 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgres://user:pass@db:5432/updater
+      BETTER_AUTH_DATABASE_URL: postgres://user:pass@auth-db:5432/auth
+      BETTER_AUTH_SECRET: "change-me-in-production-use-random-string"
+      BETTER_AUTH_URL: "http://localhost:3000"
+      PGHOST: db
+      PGPORT: "5432"
+      PGUSER: user
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: "9000"
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      ALLOW_REGISTRATION: "true"
+    depends_on:
+      - db
+      - auth-db
+      - minio
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: updater
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    restart: unless-stopped
+
+  auth-db:
+    image: postgres:16-alpine
+    volumes:
+      - authpgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    volumes:
+      - miniodata:/data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  authpgdata:
+  miniodata:

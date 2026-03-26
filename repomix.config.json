@@ -1,0 +1,28 @@
+{
+  "output": {
+    "filePath": "repomix-output.txt"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "drizzle/**/*.sql",
+    "scripts/**",
+    "docker-compose.yml",
+    "Dockerfile",
+    "package.json",
+    "tsconfig.json",
+    "next.config.ts",
+    "drizzle.config.ts",
+    "CLAUDE.md"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "src/components/ui/**",
+      "node_modules/**",
+      ".next/**",
+      "bun.lock"
+    ]
+  }
+}
