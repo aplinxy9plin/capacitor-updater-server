@@ -70,13 +70,7 @@ export const pluginRoutes = new Elysia()
   )
   .get(
     "/download/:bundleId",
-    async ({ params: { bundleId }, request }) => {
-      const apiKey = request.headers.get("x-api-key") || ""
-      const { valid } = await validateApiKey(apiKey)
-      if (!valid) {
-        return new Response(JSON.stringify({ error: "unauthorized", message: "Invalid API key" }), { status: 401, headers: { "Content-Type": "application/json" } })
-      }
-
+    async ({ params: { bundleId } }) => {
       const bundle = await PluginService.getBundleById(bundleId)
       if (!bundle || !bundle.storagePath) {
         return new Response(JSON.stringify({ error: "not_found", message: "Bundle not found" }), { status: 404, headers: { "Content-Type": "application/json" } })
