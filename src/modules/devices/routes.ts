@@ -5,6 +5,6 @@ import { DevicesService } from "./service"
 
 export const devicesRoutes = new Elysia({ prefix: "/v1/devices" })
   .get("/", async ({ request }) => {
-    await authEnsureSession(request.headers, auth.api.getSession)
-    return await DevicesService.listDevices()
+    const session = await authEnsureSession(request.headers, auth.api.getSession)
+    return await DevicesService.listDevices(session.user.id)
   })

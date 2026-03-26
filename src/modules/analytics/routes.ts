@@ -5,8 +5,8 @@ import { AnalyticsService } from "./service"
 
 export const analyticsRoutes = new Elysia({ prefix: "/v1/analytics" })
   .get("/", async ({ request }) => {
-    await authEnsureSession(request.headers, auth.api.getSession)
+    const session = await authEnsureSession(request.headers, auth.api.getSession)
     const url = new URL(request.url)
     const appIdFilter = url.searchParams.get("appId") ?? undefined
-    return await AnalyticsService.getAnalytics(appIdFilter)
+    return await AnalyticsService.getAnalytics(session.user.id, appIdFilter)
   })

@@ -2,10 +2,11 @@ import { sql } from "bun"
 import { generateApiKey } from "@/lib/api-key"
 
 export const ApiKeysService = {
-  async listKeys() {
+  async listKeys(userId: string) {
     const rows = await sql`
       SELECT id, name, key_prefix as "keyPrefix", last_used_at as "lastUsedAt", created_at as "createdAt"
       FROM api_keys
+      WHERE user_id = ${userId}
     `
     return Array.isArray(rows) ? rows : []
   },
@@ -20,8 +21,8 @@ export const ApiKeysService = {
     return { ...row, key: fullKey }
   },
 
-  async deleteKey(id: string) {
-    const rows = await sql`DELETE FROM api_keys WHERE id = ${id} RETURNING id`
+  async deleteKey(id: string, userId: string) {
+    const rows = await sql`DELETE FROM api_keys WHERE id = ${id} AND user_id = ${userId} RETURNING id`
     return rows.length > 0
   },
 }

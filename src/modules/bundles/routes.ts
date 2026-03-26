@@ -2,13 +2,16 @@ import { Elysia } from "elysia"
 import { auth } from "@/lib/auth"
 import { authEnsureSession } from "@/lib/auth-ensure-session"
 import { BundlesService } from "./service"
+import { AppsService } from "../apps/service"
 import { bundleParamsSchema, appBundlesParamsSchema, createBundleBodySchema } from "./model"
 
 export const bundlesRoutes = new Elysia({ prefix: "/v1/apps" })
   .get(
     "/:id/bundles",
-    async ({ params: { id }, request }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
+    async ({ params: { id }, request, set }) => {
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
+      if (!app) { set.status = 404; return { error: "not_found", message: "App not found" } }
       return await BundlesService.listBundles(id)
     },
     { params: appBundlesParamsSchema },
@@ -16,12 +19,9 @@ export const bundlesRoutes = new Elysia({ prefix: "/v1/apps" })
   .post(
     "/:id/bundles",
     async ({ params: { id }, body, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
-
-      if (!await BundlesService.appExists(id)) {
-        set.status = 404
-        return { error: "not_found", message: "App not found" }
-      }
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
+      if (!app) { set.status = 404; return { error: "not_found", message: "App not found" } }
 
       const trimmed = body.version.trim()
       if (!/^\d+\.\d+\.\d+/.test(trimmed)) {
@@ -45,8 +45,10 @@ export const bundlesRoutes = new Elysia({ prefix: "/v1/apps" })
   )
   .delete(
     "/:id/bundles/:bundleId",
-    async ({ params: { bundleId }, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
+    async ({ params: { id, bundleId }, request, set }) => {
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
+      if (!app) { set.status = 404; return { error: "not_found", message: "App not found" } }
       const result = await BundlesService.deleteBundle(bundleId)
       if (result.error === "not_found") { set.status = 404; return { error: "not_found", message: "Bundle not found" } }
       if (result.error === "cannot_delete_active") { set.status = 409; return { error: "cannot_delete_active", message: "Cannot delete active bundle" } }
@@ -56,8 +58,10 @@ export const bundlesRoutes = new Elysia({ prefix: "/v1/apps" })
   )
   .post(
     "/:id/bundles/:bundleId/upload",
-    async ({ params: { bundleId }, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
+    async ({ params: { id, bundleId }, request, set }) => {
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
+      if (!app) { set.status = 404; return { error: "not_found", message: "App not found" } }
 
       const arrayBuffer = await request.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
@@ -73,7 +77,9 @@ export const bundlesRoutes = new Elysia({ prefix: "/v1/apps" })
   .post(
     "/:id/bundles/:bundleId/activate",
     async ({ params: { id, bundleId }, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
+      if (!app) { set.status = 404; return { error: "not_found", message: "App not found" } }
       const result = await BundlesService.activateBundle(id, bundleId)
       if (result.error === "not_found") { set.status = 404; return { error: "not_found", message: "Bundle not found" } }
       if (result.error === "no_file") { set.status = 400; return { error: "no_file", message: "Upload a file before activating" } }

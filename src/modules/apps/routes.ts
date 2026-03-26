@@ -6,15 +6,15 @@ import { appIdParamsSchema, createAppBodySchema } from "./model"
 
 export const appsRoutes = new Elysia({ prefix: "/v1/apps" })
   .get("/", async ({ request }) => {
-    await authEnsureSession(request.headers, auth.api.getSession)
-    return await AppsService.listApps()
+    const session = await authEnsureSession(request.headers, auth.api.getSession)
+    return await AppsService.listApps(session.user.id)
   })
   .post(
     "/",
     async ({ body, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
       try {
-        const app = await AppsService.createApp(body.name, body.appId)
+        const app = await AppsService.createApp(session.user.id, body.name, body.appId)
         set.status = 201
         return app
       } catch (err: any) {
@@ -30,8 +30,8 @@ export const appsRoutes = new Elysia({ prefix: "/v1/apps" })
   .get(
     "/:id",
     async ({ params: { id }, request, set }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
-      const app = await AppsService.getAppById(id)
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      const app = await AppsService.getAppById(id, session.user.id)
       if (!app) {
         set.status = 404
         return { error: "not_found", message: "App not found" }
@@ -43,8 +43,8 @@ export const appsRoutes = new Elysia({ prefix: "/v1/apps" })
   .delete(
     "/:id",
     async ({ params: { id }, request }) => {
-      await authEnsureSession(request.headers, auth.api.getSession)
-      await AppsService.deleteApp(id)
+      const session = await authEnsureSession(request.headers, auth.api.getSession)
+      await AppsService.deleteApp(id, session.user.id)
       return { deleted: true }
     },
     { params: appIdParamsSchema },
